@@ -1,0 +1,6 @@
+
+*.json
+.vscode/tasks.json
+.vscode/settings.json
+.vscode/launch.json
+Data_Structures_and_Algorithms_in_CPP_by_Adam_Drozdek.code-workspace

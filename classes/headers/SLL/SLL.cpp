@@ -20,6 +20,9 @@ SLLNode<type>::SLLNode(type el, SLLNode *ptr)    // Two args constructor
     : info{el}, next{ptr} {}
 
 
+// Destructor for a node
+template <typename type>
+SLLNode<type>::~SLLNode() {}
 
 
 
@@ -27,27 +30,38 @@ SLLNode<type>::SLLNode(type el, SLLNode *ptr)    // Two args constructor
 // SLL class member functions
 // ==================================================================
 
+
+// private functions
+template <typename type>
+void SLL<type>::reverseSubList(SLLNode<type>* prev, SLLNode<type>* first) {
+    if(first->next == nullptr)
+        first->next=prev;
+    else {
+        reverseSubList(first,first->next);
+        first->next=prev;
+    }
+}
+
+
 // default constructor for SLL
 template <typename type>
 SLL<type>::SLL()
     : head{nullptr}, tail{nullptr}, sizeOfList{0} {}           // head and tail points to null
 
 
-// to be implemented later
-// constructor accepting an array and initialising SLL with it
-// template <typename type>
-// SLL<type>::SLL(std::vector<type> list) {
-//     for(int i=0; i<list.size(); i++) {
-//         this->addToTail(list[i]);       // add list vector's elements one by one to the 
-//     }
-// }
-//
+// initializer list constructor
+template <typename type>
+SLL<type>::SLL(std::initializer_list<type> &lst) {
+    for(auto it=lst.begin(); it!=lst.end(); it++)
+        this->addToTail(*it);
+}
 
 
 // copy constructor
 template <typename type>
 SLL<type>::SLL(const SLL<type> &list) {
-    this->clear();
+    sizeOfList = list.sizeOfList;
+    // this->clear();
     this->head={nullptr};
     this->tail={nullptr};
 
@@ -61,7 +75,7 @@ SLL<type>::SLL(const SLL<type> &list) {
 template <typename type>
 SLL<type>::~SLL() {
 // Loop through the linked list deleting one by one until list becomes empty
-
+    sizeOfList =0 ;
     for(SLLNode<type> *p; !isEmpty(); ) 
     {
         p = head->next;     // asssign the address of 2nd node to p
@@ -71,83 +85,6 @@ SLL<type>::~SLL() {
 }
 
 
-// -----------------------------------------------
-// Overloaded operators for SLL
-// -----------------------------------------------
-
-// assignment operator
-template <typename type>
-SLL<type> &SLL<type>::operator=(const SLL<type> &list) {
-    SLL<type> temp{list};
-    return temp;
-}
-
-
-template <typename type>
-SLLNode<type> SLL<type>::operator[](int index){
-    if(index>sizeOfList || index<0)
-        throw std::runtime_error("index out of bounds");
-    else {
-        SLLNode<type> *ptr = this->head;
-        for(int i=0; i<index; i++) {
-            ptr=ptr->next;
-        }
-        return *ptr;
-    }
-}
-
-
-template <typename type>
-bool SLL<type>::operator==(const SLL<type> &list) {
-    if(this->sizeOfList!=list.sizeOfList)
-        return false;
-
-    int size = sizeOfList;
-
-    SLLNode<type> *ptr1,*ptr2;
-    ptr1 = this->head;
-    ptr2 = list->head;
-
-    for(int i=0; i<size; i++) {
-        if(ptr1->info!=ptr2->info)
-            return false;
-        ptr1=ptr1->next;
-        ptr2=ptr2->next;
-    }
-    return true;
-}
-
-
-// addition operator (arg: two lists)
-template <typename type>
-SLL<type> &operator+(const SLL<type> &lhs, const SLL<type> &rhs) {
-    SLL<type> list1 = lhs, list2 = rhs;
-    list1.tail->next = list2.head;
-    list1.tail = list2.tail;
-
-    delete list2;
-
-    return list1;
-}
-
-
-// addition operator
-template <typename type>
-SLL<type> &operator+(SLL<type> &lhs, type data) {
-    lhs.addToTail(data);
-    return lhs;
-}
-
-
-// addition operator
-template <typename type>
-SLL<type> &operator+(type data, SLL<type> &rhs) {
-    rhs.addToHead(data);
-    return rhs;
-}
-
-
-// ----------------------------------------------
 
 
 // returns the size of the list
@@ -202,6 +139,96 @@ void SLL<type>::addToTail(type data) {
 }
 
 
+// insert data at index
+template <typename type>
+void SLL<type>::insertAt(type data, int index) {
+    // throw error if index is out of range
+    if(index<0 || index>=this->sizeOfList) throw std::runtime_error("Index out of bounds");
+
+    SLLNode<type>* ptr = this->head;
+    for(int i=0; i<index; i++)  // get the pointer to the node at index
+        ptr = ptr->next;
+
+    SLLNode<type>* temp = SLLNode<type>{ptr->info};
+    ptr->info = data;
+    temp->next = ptr->next;
+    ptr->next = temp;
+    if(index==0) this->head=ptr;    //update the head of the list
+    
+    this->sizeOfList++;
+}
+
+
+// insert data after index
+template <typename type>
+void SLL<type>::insertAfter(type data, int index) {
+    if(index<0 || index>=sizeOfList) throw std::runtime_error("Index out of bounds");
+
+    if(index == this->sizeOfList - 1) {
+        SLLNode<type>* temp = new SLLNode<type>{data};
+        tail->next = temp;
+        tail = tail->next;          // update the tail of the list
+        tail->next = nullptr;
+
+        this->sizeOfList++;
+    }
+    else
+        this->insertAt(data,index+1);
+}
+
+
+// insert data at the node pointed to by ptr
+template <typename type>
+void SLL<type>::insertAt(type data, SLLNode<type>* &ptr) {
+    if(ptr==this->head) {
+        SLLNode<type>* temp = new SLLNode<type>{data,this->head};
+        head = temp;
+        this->sizeOfList++;
+    }
+    else {
+        SLLNode<type>* temp = new SLLNode<type>{ptr->info,ptr->next};
+        ptr->info = data;
+        ptr->next = temp;
+        ptr = temp;
+        this->sizeOfList++;
+    }
+}
+
+
+// insert data after the node pointed to by ptr
+template <typename type>
+void SLL<type>::insertAfter(type data, SLLNode<type>* &ptr) {
+    SLLNode<type>* temp = new SLLNode<type>{data,ptr->next};
+    ptr->next = temp;
+    if(ptr==tail)
+        tail = temp;
+
+    this->sizeOfList++;
+}
+
+
+// attach list's head to the tail of the calling list
+template <typename type>
+void SLL<type>::append(SLL<type> &list) {
+    if((this->sizeOfList == 0 && list.sizeOfList == 0) || list.sizeOfList==0)
+        return;
+    else if(this->sizeOfList == 0) {
+        this->head = list.head;
+        this->tail = list.tail;
+    }
+    else {
+        this->tail->next = list.head;
+        this->tail = list.tail;
+    }
+
+    this->sizeOfList += list.sizeOfList;
+
+    list.head = nullptr; 
+    list.tail = nullptr;
+    list.sizeOfList = 0;
+}
+
+
 // delete the head node and return its info
 template <typename type>
 type SLL<type>::deleteFromHead() {
@@ -247,6 +274,39 @@ type SLL<type>::deleteFromTail() {
 
     return data;      // returns the deleted node info
 }
+
+
+// delete the node by index
+template <typename type>
+void SLL<type>::deleteNodeAt(int index) {
+    if(index<0 || index>=sizeOfList)
+    return;
+        // throw std::runtime_error("index out of bounds");
+
+    if(index==0) {
+        this->deleteFromHead();
+        return;
+    }
+    else if(index==sizeOfList-1) {
+        this->deleteFromTail();
+        return;
+    }
+
+    SLLNode<type> *prev = this->head;
+    SLLNode<type> *curr = this->head->next;
+    int i=1;
+    while(i!=index) {
+        prev = prev->next;
+        curr = curr->next;
+        i++;
+    }
+
+    prev->next = curr->next;
+    delete curr;
+    sizeOfList--;
+    return;
+}
+
 
 
 // deletes the node with info value num
@@ -303,7 +363,8 @@ void SLL<type>::clear() {
     int length = this->size();
     for(int i=0; i<length; i++) {
         this->deleteFromTail();
-    }
+    } 
+    sizeOfList=0;
 } 
 
 
@@ -333,9 +394,10 @@ template <typename type>
 void SLL<type>::print() const {
     SLLNode<type> *ptr = head;
     for(int i=0; i<this->size(); i++) {
-        std::cout << ptr->info << std::endl;
+        std::cout << ptr->info << " ";
         ptr = ptr->next;
     }
+    std::cout << "\n";
 }
 
 
@@ -352,47 +414,155 @@ void SLL<type>::print() const {
 // merge two lists
 template <typename type>
 void SLL<type>::merge(SLL<type> &list) {
+    // get the size of each list
     int size1 = this->sizeOfList;
-    int size2 = list.sizeOfList;
-    int i{0},j{0};
+    int size2 = list.size();
 
-    if(list.size()==0)
-        return;
-    else if(this->size()==0) {
-        *this = list;
-    }
+    int totalSize = size1+size2;
+    this->sizeOfList = totalSize;
 
-    SLLNode<type> *ptr1 = this->head;
-    SLLNode<type> *ptr2 = list.head;
+    if(size1==0) {*this = list; return;}
+    else if(size2==0) return;
 
-    SLL<type> temp{};
+    SLL<type>* temp = new SLL<type>();
+
+    SLLNode<type>* ptr1 = this->head;
+    SLLNode<type>* ptr2 = list.head;
 
     while(true) {
-        if(ptr1->info < ptr2->info) {
-            temp.addToTail(ptr1->info);
-            ptr1=ptr1->next;
-            i++;
-            if(i>=size1) {
-                while(ptr2!=nullptr) {
-                    temp.addToTail(ptr2->info);
-                    ptr2=ptr2->next;
+        if(ptr1->info > ptr2->info) {
+            temp->addToTail(ptr2->info);
+            ptr2 = ptr2->next;
+            if(ptr2 == nullptr) {
+                while(ptr1!=nullptr) {
+                    temp->addToTail(ptr1->info);
+                    ptr1 = ptr1->next;
                 }
-                *this = temp;
+                this->head = temp->head;
+                this->tail = temp->tail;
                 return;
             }
         }
         else {
-            temp.addToTail(ptr2->info);
-            ptr2 = ptr2->next;
-            j++;
-            if(j>=size2) {
-                while(ptr1!=nullptr) {
-                    temp.addToTail(ptr1->info);
-                    ptr1=ptr1->next;
+            temp->addToTail(ptr1->info);
+            ptr1 = ptr1->next;
+            if(ptr1 == nullptr) {
+                while(ptr2!=nullptr) {
+                    temp->addToTail(ptr2->info);
+                    ptr2 = ptr2->next;
                 }
-                *this = temp;
+                this->head = temp->head;
+                this->tail = temp->tail;
                 return;
             }
         }
     }
 }
+
+
+// reverse the list
+template <typename type>
+void SLL<type>::reverse() {
+    this->reverseSubList(nullptr,this->head);
+    SLLNode<type>* temp = this->head;
+    this->head = this->tail;
+    this->tail = temp;
+}
+
+
+// -----------------------------------------------
+// Overloaded operators for SLL
+// -----------------------------------------------
+
+// assignment operator
+template <typename type>
+SLL<type> &SLL<type>::operator=(const SLL<type> &list) {
+    SLL<type>* temp = new SLL<type>(list);
+    return *temp;
+}
+
+
+// subscript operator for normal lists
+template <typename type>
+type &SLL<type>::operator[](int index){
+    if(index>=sizeOfList || index<0)
+        throw std::runtime_error("index out of bounds");
+    else {
+        SLLNode<type> *ptr = this->head;
+        for(int i=0; i<index; i++) {
+            ptr=ptr->next;
+        }
+        return ptr->info;
+    }
+}
+
+
+// subscript operator for const list
+template <typename type>
+type SLL<type>::operator[](int index) const{
+    if(index>=sizeOfList || index<0)
+        throw std::runtime_error("index out of bounds");
+    else {
+        SLLNode<type> *ptr = this->head;
+        for(int i=0; i<index; i++) {
+            ptr=ptr->next;
+        }
+        return ptr->info;
+    }
+}
+
+
+// equality checking operator
+template <typename type>
+bool SLL<type>::operator==(const SLL<type> &list) {
+    if(this->sizeOfList!=list.sizeOfList)
+        return false;
+
+    int size = sizeOfList;
+
+    SLLNode<type> *ptr1,*ptr2;
+    ptr1 = this->head;
+    ptr2 = list.head;
+
+    for(int i=0; i<size; i++) {
+        if(ptr1->info!=ptr2->info)
+            return false;
+        ptr1=ptr1->next;
+        ptr2=ptr2->next;
+    }
+
+    return true;
+}
+
+
+// addition operator (arg: two lists)
+template <typename type>
+SLL<type> &operator+(SLL<type> &lhs, SLL<type> &rhs) {
+    // SLL<type> list1 = &lhs, list2 = rhs;
+    lhs.tail->next = rhs.head;
+    lhs.tail = rhs.tail;
+    lhs.sizeOfList += rhs.sizeOfList;
+
+    delete rhs;
+
+    return lhs;
+}
+
+
+// addition operator
+template <typename type>
+SLL<type> &operator+(SLL<type> &lhs, type data) {
+    lhs.addToTail(data);
+    return lhs;
+}
+
+
+// addition operator
+template <typename type>
+SLL<type> &operator+(type data, SLL<type> &rhs) {
+    rhs.addToHead(data);
+    return rhs;
+}
+
+
+// ----------------------------------------------
