@@ -49,12 +49,12 @@ SLL<type>::SLL()
     : head{nullptr}, tail{nullptr}, sizeOfList{0} {}           // head and tail points to null
 
 
-// initializer list constructor
-template <typename type>
-SLL<type>::SLL(std::initializer_list<type> &lst) {
-    for(auto it=lst.begin(); it!=lst.end(); it++)
-        this->addToTail(*it);
-}
+// // initializer list constructor
+// template <typename type>
+// SLL<type>::SLL(std::initializer_list<type> &lst) {
+//     for(auto it=lst.begin(); it!=lst.end(); it++)
+//         this->push_back(*it);
+// }
 
 
 // copy constructor
@@ -66,7 +66,7 @@ SLL<type>::SLL(const SLL<type> &list) {
     this->tail={nullptr};
 
     for(SLLNode<type>* ptr{list.head}; ptr!=nullptr; ptr=ptr->next) {
-        this->addToTail(ptr->info);
+        this->push_back(ptr->info);
     }
 }
 
@@ -85,18 +85,16 @@ SLL<type>::~SLL() {
 }
 
 
-
-
 // returns the size of the list
 template <typename type>
-int SLL<type>::size() const {
+const SLL<type>::size_type SLL<type>::size() const {
     return sizeOfList;
 }
 
 
 // function to check whether list is empty or not
 template <typename type>
-bool SLL<type>::isEmpty() const {
+const bool SLL<type>::isEmpty() const {
     return head == nullptr;       // returns true if head points to a nul pointer
 }
 
@@ -106,7 +104,7 @@ bool SLL<type>::isEmpty() const {
 // 1. create a new node with a value pointing to first node
 // 2. assign this node to head
 template <typename type>
-void SLL<type>::addToHead(type data) {
+void SLL<type>::push_front(const type &data) {
     // initialize a node with value pointing to the head of the list 
     // and assign it to the head pointer
     head = new SLLNode<type>(data,head);
@@ -123,7 +121,7 @@ void SLL<type>::addToHead(type data) {
 // 2. assign this to the next member of the last pointer
 // 3. make tail point to this new pointer
 template <typename type>
-void SLL<type>::addToTail(type data) {
+void SLL<type>::push_back(const type &data) {
     if(tail!=nullptr) {   // if list is not empty
     // initialize a new node with value data and make it pointed by
     // the tail of the list
@@ -141,7 +139,7 @@ void SLL<type>::addToTail(type data) {
 
 // insert data at index
 template <typename type>
-void SLL<type>::insertAt(type data, int index) {
+void SLL<type>::insertAt(type data, size_type index) {
     // throw error if index is out of range
     if(index<0 || index>=this->sizeOfList) throw std::runtime_error("Index out of bounds");
 
@@ -149,19 +147,19 @@ void SLL<type>::insertAt(type data, int index) {
     for(int i=0; i<index; i++)  // get the pointer to the node at index
         ptr = ptr->next;
 
-    SLLNode<type>* temp = SLLNode<type>{ptr->info};
+    SLLNode<type>* temp = new SLLNode<type>{ptr->info};
     ptr->info = data;
     temp->next = ptr->next;
     ptr->next = temp;
     if(index==0) this->head=ptr;    //update the head of the list
-    
+
     this->sizeOfList++;
 }
 
 
 // insert data after index
 template <typename type>
-void SLL<type>::insertAfter(type data, int index) {
+void SLL<type>::insertAfter(type data, size_type index) {
     if(index<0 || index>=sizeOfList) throw std::runtime_error("Index out of bounds");
 
     if(index == this->sizeOfList - 1) {
@@ -231,7 +229,7 @@ void SLL<type>::append(SLL<type> &list) {
 
 // delete the head node and return its info
 template <typename type>
-type SLL<type>::deleteFromHead() {
+void SLL<type>::pop_front() {
     type data = head->info;      // store head's info in num
     SLLNode<type> *temp = head;    // pointer to head
 
@@ -250,7 +248,7 @@ type SLL<type>::deleteFromHead() {
 
 // delete the tail node and return its info
 template <typename type>
-type SLL<type>::deleteFromTail() {
+void SLL<type>::pop_back() {
     type data = tail->info;   // store the info of the node which is deleted
 
     SLLNode<type> *ptr = head; // start from head
@@ -278,17 +276,17 @@ type SLL<type>::deleteFromTail() {
 
 // delete the node by index
 template <typename type>
-void SLL<type>::deleteNodeAt(int index) {
+void SLL<type>::deleteNodeAt(size_type index) {
     if(index<0 || index>=sizeOfList)
     return;
         // throw std::runtime_error("index out of bounds");
 
     if(index==0) {
-        this->deleteFromHead();
+        this->pop_front();
         return;
     }
     else if(index==sizeOfList-1) {
-        this->deleteFromTail();
+        this->pop_back();
         return;
     }
 
@@ -333,7 +331,7 @@ void SLL<type>::deleteNode(type data) {
             for(; curr!=nullptr; prev=curr,curr=curr->next) {
                 if(curr->info==data) {
                     if(curr==tail) {        // execute if tail is to be deleted
-                        this->deleteFromTail();
+                        this->pop_back();
                     }
                     else {          // execute if a node between head and tail is to be deleted
                         prev->next=curr->next;
@@ -362,7 +360,7 @@ template <typename type>
 void SLL<type>::clear() {
     int length = this->size();
     for(int i=0; i<length; i++) {
-        this->deleteFromTail();
+        this->pop_back();
     } 
     sizeOfList=0;
 } 
@@ -391,7 +389,7 @@ bool SLL<type>::isInList(type data) const {
 
 // prints the elements of the list line by line
 template <typename type>
-void SLL<type>::print() const {
+const void SLL<type>::print() const {
     SLLNode<type> *ptr = head;
     for(int i=0; i<this->size(); i++) {
         std::cout << ptr->info << " ";
@@ -431,11 +429,11 @@ void SLL<type>::merge(SLL<type> &list) {
 
     while(true) {
         if(ptr1->info > ptr2->info) {
-            temp->addToTail(ptr2->info);
+            temp->push_back(ptr2->info);
             ptr2 = ptr2->next;
             if(ptr2 == nullptr) {
                 while(ptr1!=nullptr) {
-                    temp->addToTail(ptr1->info);
+                    temp->push_back(ptr1->info);
                     ptr1 = ptr1->next;
                 }
                 this->head = temp->head;
@@ -444,11 +442,11 @@ void SLL<type>::merge(SLL<type> &list) {
             }
         }
         else {
-            temp->addToTail(ptr1->info);
+            temp->push_back(ptr1->info);
             ptr1 = ptr1->next;
             if(ptr1 == nullptr) {
                 while(ptr2!=nullptr) {
-                    temp->addToTail(ptr2->info);
+                    temp->push_back(ptr2->info);
                     ptr2 = ptr2->next;
                 }
                 this->head = temp->head;
@@ -484,7 +482,7 @@ SLL<type> &SLL<type>::operator=(const SLL<type> &list) {
 
 // subscript operator for normal lists
 template <typename type>
-type &SLL<type>::operator[](int index){
+type &SLL<type>::operator[](size_type index){
     if(index>=sizeOfList || index<0)
         throw std::runtime_error("index out of bounds");
     else {
@@ -499,7 +497,7 @@ type &SLL<type>::operator[](int index){
 
 // subscript operator for const list
 template <typename type>
-type SLL<type>::operator[](int index) const{
+type SLL<type>::operator[](size_type index) const{
     if(index>=sizeOfList || index<0)
         throw std::runtime_error("index out of bounds");
     else {
@@ -552,7 +550,7 @@ SLL<type> &operator+(SLL<type> &lhs, SLL<type> &rhs) {
 // addition operator
 template <typename type>
 SLL<type> &operator+(SLL<type> &lhs, type data) {
-    lhs.addToTail(data);
+    lhs.push_back(data);
     return lhs;
 }
 

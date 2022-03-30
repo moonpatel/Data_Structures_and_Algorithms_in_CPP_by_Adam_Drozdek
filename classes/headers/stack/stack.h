@@ -1,10 +1,12 @@
 #ifndef _STACK_H_
 #define _STACK_H_
 
+#include <vector>
+
 template <typename type>
 class STACK {
 private:
-    vector<type> pool;
+    std::vector<type> pool;
 public:
     STACK();    // Default constructor
     void push(type object);     // push object on top of the stack

@@ -47,5 +47,8 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "C_Cpp.default.includePath": [
+        "/home/moon/Documents/GitHub/Data_Structures_and_Algorithms_in_CPP_by_Adam_Drozdek/classes/headers/"
+    ]
 }

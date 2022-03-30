@@ -18,37 +18,58 @@ class SLLNode {
 // class for the singly linked list
 template <typename type>
 class SLL {
-private:
-    void reverseSubList(SLLNode<type>* prev, SLLNode<type>* first);
 public:
-    SLLNode<type> *head,*tail;
-    int sizeOfList;
-// public:
-    SLL();              // default no args constructor
-    SLL(std::initializer_list<type> &lst);
-    SLL(const SLL<type> &list);         // copy constructor
+    using size_type = unsigned long int;
+    using iterator = SLLNode<type>*;
+
+    SLL();                          // default no args constructor
+    SLL(const SLL<type> &list);     // copy constructor
+    SLL(SLL<type> &&list);          // move constructor
     ~SLL();             // destructor
 
-    int size() const;       // returns the size of the list
-    bool isEmpty() const;   // returns true if list is empty
+    // iterator class for the list
+    class iterator {
+    public:
+        iterator(ptr);
+        iterator &operator++() {curr=curr->next; return *this;}
+        type &operator*() {return curr->info;}
 
-    void addToHead(type data);      // add a node to head of the list
-    void addToTail(type data);      // add a node to tail of list
+        bool operator==(const iterator &b) {return *this==b;}
+        bool operator!=(const iterator &b) {return *this!=b;}
+    private:
+        SLLNode<type>* curr;    // current iterator
+    };
 
-    void insertAt(type data, int index);    // insert data at index
-    void insertAfter(type data, int index); // insert data after node at index
+    iterator begin();   // iterator to the head of list
+    iterator end();     // iterator to the next to tail member of list
+
+    type &front();      // return head
+    type &back();       // return tail
+
+    // insert value at node pointed by iter and return an iterator to the value
+    iterator &insert(iterator iter, type value);
+    iterator &erase(iterator iter);     // erase node pointed to by iterator and return an iterator to the next node
+
+    const size_type size() const;       // returns the size of the list
+    const bool isEmpty() const;   // returns true if list is empty
+
+    void push_back(const type &data);      // add a node to tail of list
+    void push_front(const type &data);      // add a node to head of the list
+    void pop_back();          // delete tail and return its info
+    void pop_front();          // delete head and return its info
+
+    void insertAt(type data, size_type index);    // insert data at index
+    void insertAfter(type data, size_type index); // insert data after node at index
     void insertAt(type data, SLLNode<type>* &ptr);       // insert data at node pointed to by ptr
     void insertAfter(type data, SLLNode<type>* &ptr);    // insert data after node pointed to by ptr
     void append(SLL<type> &list);   // attach list head to tail of the calling list
 
-    type deleteFromHead();          // delete head and return its info
-    type deleteFromTail();          // delete tail and return its info
-    void deleteNodeAt(int index);   // delete node by index
+    void deleteNodeAt(size_type index);   // delete node by index
     void deleteNode(type data);     // delete a node with info data
     void deleteNodes(type data);    // deletes all the nodes with info data
 
     void clear();                   // delete the contents of the list
-    void print() const;             // prints the elements of list line by line
+    const void print() const;             // prints the elements of list line by line
     bool isInList(type data) const; // returns true if data is in list
     void sort();                    // sort the list
     void merge(SLL<type> &list);    // merge two sorted list in one sorted listed
@@ -56,16 +77,18 @@ public:
 
     // overloaded operators
     SLL<type> &operator=(const SLL<type> &list);        // assignment operator
-    type &operator[](int index);                        // subscript operator
-    type operator[](int index) const;                   // subscript operator for const list
+    type &operator[](size_type index);                        // subscript operator
+    type operator[](size_type index) const;                   // subscript operator for const list
     bool operator==(const SLL<type> &list);             // equality operator
-};
 
-template <typename type>
-SLL<type> &operator+(const SLL<type> &lhs, const SLL<type> &rhs);
-template <typename type>
-SLL<type> &operator+(const SLL<type> &lhs, type data);
-template <typename type>
-SLL<type> &operator+(type data, const SLL<type> &rhs);
+    friend SLL<type> &operator+(const SLL<type> &lhs, const SLL<type> &rhs);
+    friend SLL<type> &operator+(const SLL<type> &lhs, type data);
+    friend SLL<type> &operator+(type data, const SLL<type> &rhs);
+private:
+    void reverseSubList(SLLNode<type>* prev, SLLNode<type>* first);
+    SLLNode<type> *head;
+    SLLNode<type> *tail;
+    size_type sizeOfList;
+};
 
 #endif

@@ -13,7 +13,9 @@ void STACK<type>::push(type object) {
 
 template <typename type>
 type STACK<type>::pop() {
+    type temp = this->top();
     pool.pop_back();
+    return temp;
 }
 
 template <typename type>
