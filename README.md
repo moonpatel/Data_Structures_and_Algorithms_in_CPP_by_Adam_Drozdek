@@ -1,2 +1,2 @@
-# Data_Structures_and_Algorithms_in_CPP_by_Adam_Drozdek
+# Data Structures and Algorithms
 All the code related to the book 'Data Structures and Algorithms in C++' by Adam Drozdek
